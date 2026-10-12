@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "AS Traders",
-    "slug": "zikriya-darbar",
+    "slug": "as-traders",
     "version": "1.0.0",
     "scheme": "astraders",
     "orientation": "portrait",
@@ -25,8 +25,7 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.USE_FINGERPRINT"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -57,9 +56,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "a86cf3ad-a67e-40a2-9b7a-6dbf44fdb57e"
+        "projectId": "c9ba8fbc-f384-490f-86ab-dadf9d0eba93"
       }
     },
-    "owner": "adeel128"
+    "owner": "adee1258"
   }
 }
