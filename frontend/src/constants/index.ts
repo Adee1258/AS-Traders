@@ -5,7 +5,7 @@ const debuggerHost = Constants.expoConfig?.hostUri;
 const localhost = debuggerHost ? debuggerHost.split(':')[0] : 'localhost';
 
 // ── Production API URL ─────────────────────────────────────────────────────
-const PRODUCTION_API_URL = 'https://backend-kvhn6a2ov-adeels.vercel.app/api';
+const PRODUCTION_API_URL = 'https://as-traders-blue.vercel.app/api';
 
 export const API_BASE_URL = __DEV__
   ? Platform.OS === 'web'
