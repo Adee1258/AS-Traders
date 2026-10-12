@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>AS Traders — Splash Generator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1290px;
+      height: 2796px;
+      overflow: hidden;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #021810;
+    }
+
+    .bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 42%,
+        #1a6b4a 0%,
+        #0A7B5E 18%,
+        #043D2E 45%,
+        #021810 75%,
+        #010e0a 100%
+      );
+    }
+
+    /* Corner accents */
+    .corner {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-color: rgba(245,158,11,0.35);
+      border-style: solid;
+    }
+    .tl { top: 90px;  left: 70px;  border-width: 4px 0 0 4px; }
+    .tr { top: 90px;  right: 70px; border-width: 4px 4px 0 0; }
+    .bl { bottom: 90px; left: 70px;  border-width: 0 0 4px 4px; }
+    .br { bottom: 90px; right: 70px; border-width: 0 4px 4px 0; }
+
+    /* Radial glow behind logo */
+    .glow {
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      transform: translate(-50%, -50%);
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(245,158,11,0.22) 0%,
+        rgba(245,158,11,0.08) 40%,
+        transparent 70%
+      );
+    }
+
+    /* Subtle horizontal scan lines for texture */
+    .scanlines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.06) 3px,
+        rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none;
+    }
+
+    /* Main content */
+    .center {
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* Outer ring */
+    .ring-outer {
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      border: 3px solid rgba(245,158,11,0.20);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Inner ring */
+    .ring-inner {
+      width: 272px;
+      height: 272px;
+      border-radius: 50%;
+      border: 4px solid rgba(245,158,11,0.42);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Logo circle */
+    .logo-circle {
+      width: 222px;
+      height: 222px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #F59E0B 0%, #D97706 55%, #B45309 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 60px rgba(245,158,11,0.7),
+        0 0 120px rgba(245,158,11,0.35),
+        0 0 200px rgba(245,158,11,0.15);
+    }
+    .bolt {
+      font-size: 112px;
+      line-height: 1;
+      filter: drop-shadow(0 0 24px #fff) drop-shadow(0 0 40px #F59E0B);
+      /* slight tilt */
+      transform: rotate(-5deg);
+    }
+
+    /* Spark dots around logo */
+    .spark {
+      position: absolute;
+      background: #F59E0B;
+      border-radius: 3px;
+      box-shadow: 0 0 12px 3px rgba(245,158,11,0.9);
+    }
+    .s1 { width: 10px; height: 26px; top:  28px; left: 90px;  transform: rotate(-40deg); }
+    .s2 { width:  8px; height: 20px; top:  60px; right: 58px; transform: rotate(28deg);  }
+    .s3 { width:  8px; height: 18px; bottom: 50px; left: 60px; transform: rotate(-18deg); }
+    .s4 { width:  6px; height: 14px; bottom: 80px; right: 72px; transform: rotate(50deg); }
+
+    /* Text block */
+    .text-block {
+      margin-top: 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 92px;
+      font-weight: 900;
+      color: #FFFFFF;
+      letter-spacing: 10px;
+      text-transform: uppercase;
+      text-shadow:
+        0 0 30px rgba(245,158,11,0.5),
+        0 0 60px rgba(245,158,11,0.2),
+        0 4px 20px rgba(0,0,0,0.5);
+    }
+    .underline {
+      width: 420px;
+      height: 5px;
+      background: linear-gradient(90deg, transparent, #F59E0B 20%, #F59E0B 80%, transparent);
+      border-radius: 3px;
+      box-shadow: 0 0 14px rgba(245,158,11,0.8);
+    }
+    .tagline {
+      font-size: 28px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.50);
+      letter-spacing: 9px;
+      text-transform: uppercase;
+    }
+
+    /* Bottom tagline */
+    .bottom-tag {
+      position: absolute;
+      bottom: 130px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 22px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.22);
+      letter-spacing: 4px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="scanlines"></div>
+  <div class="glow"></div>
+
+  <!-- Corner accents -->
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <!-- Main logo + text -->
+  <div class="center">
+    <!-- Logo rings -->
+    <div style="position:relative; display:inline-flex;">
+      <div class="ring-outer">
+        <div class="ring-inner">
+          <div class="logo-circle">
+            <span class="bolt">⚡</span>
+          </div>
+        </div>
+      </div>
+      <!-- Sparks -->
+      <div class="spark s1"></div>
+      <div class="spark s2"></div>
+      <div class="spark s3"></div>
+      <div class="spark s4"></div>
+    </div>
+
+    <!-- Text -->
+    <div class="text-block">
+      <div class="brand">AS Traders</div>
+      <div class="underline"></div>
+      <div class="tagline">Wholesale Management</div>
+    </div>
+  </div>
+
+  <!-- Bottom text -->
+  <div class="bottom-tag">© 2026 AS TRADERS</div>
+</body>
+</html>

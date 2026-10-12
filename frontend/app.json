@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "AS Traders",
+    "slug": "as-traders",
+    "version": "1.0.0",
+    "scheme": "astraders",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.astraders.app"
+    },
+    "android": {
+      "package": "com.astraders.app",
+      "versionCode": 1,
+      "softwareKeyboardLayoutMode": "pan",
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF"
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {}
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "AS Traders ko aapki gallery access chahiye taake bill photo upload ho sake.",
+          "cameraPermission": "AS Traders ko camera access chahiye taake bill ki photo li ja sake."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a86cf3ad-a67e-40a2-9b7a-6dbf44fdb57e"
+      }
+    }
+  }
+}
