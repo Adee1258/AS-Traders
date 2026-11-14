@@ -7,6 +7,7 @@ import { AuthRequest } from '../middleware/auth';
 import { generateOrderNumber } from '../utils/generateOrderNumber';
 import { getLastLedgerBalance } from '../utils/balanceHelper';
 import { createAutoBill } from './billController';
+import { uploadImage, deleteImage } from '../utils/cloudinary';
 
 interface OrderItemInput {
   productId: string;
@@ -302,14 +303,33 @@ export const updateOrderBill = async (req: AuthRequest, res: Response): Promise<
       return;
     }
 
-    // Validate base64 size — reject if > 5 MB (base64 ~= 1.37× raw)
+    // Validate base64 size — reject if > 7 MB (base64 ~= 1.37× raw)
     if (billImageUrl && billImageUrl.length > 7 * 1024 * 1024) {
       res.status(413).json({ success: false, message: 'Image too large. Please use a smaller image (max ~5 MB).' });
       return;
     }
 
     const update: Record<string, unknown> = {};
-    if (billImageUrl !== undefined) update.billImageUrl = billImageUrl;
+
+    // Upload to Cloudinary if a new image is provided, instead of storing raw base64
+    if (billImageUrl !== undefined) {
+      // If this order already has a Cloudinary image, delete the old one first
+      const existing = await Order.findById(id).lean();
+      if (existing?.billImagePublicId) {
+        await deleteImage(existing.billImagePublicId).catch(() => { });
+      }
+
+      if (billImageUrl) {
+        const uploaded = await uploadImage(billImageUrl, 'as_traders_order_bills');
+        update.billImageUrl = uploaded.url;
+        update.billImagePublicId = uploaded.publicId;
+      } else {
+        // Explicit null — remove image
+        update.billImageUrl = null;
+        update.billImagePublicId = null;
+      }
+    }
+
     if (billDescription !== undefined) update.billDescription = billDescription.trim();
 
     const order = await Order.findByIdAndUpdate(

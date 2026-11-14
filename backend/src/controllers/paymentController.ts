@@ -240,3 +240,50 @@ export const createPayment = async (req: AuthRequest, res: Response): Promise<vo
     res.status(500).json({ success: false, message: 'Server error while recording payment' });
   }
 };
+
+// PUT /api/payments/:id  (admin only)
+export const updatePayment = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { amount, paymentMethod, notes } = req.body;
+
+    const payment = await Payment.findById(req.params.id);
+    if (!payment) {
+      res.status(404).json({ success: false, message: 'Payment not found' });
+      return;
+    }
+
+    const oldAmount = payment.amount;
+
+    if (amount !== undefined) {
+      const parsed = Number(amount);
+      if (isNaN(parsed) || parsed <= 0) {
+        res.status(400).json({ success: false, message: 'Amount must be a positive number' });
+        return;
+      }
+      payment.amount = parsed;
+    }
+    if (paymentMethod !== undefined) payment.paymentMethod = paymentMethod;
+    if (notes !== undefined) payment.notes = notes.trim();
+
+    await payment.save();
+
+    // If amount changed, update the matching ledger entry to keep balance correct
+    if (amount !== undefined && Number(amount) !== oldAmount) {
+      const diff = payment.amount - oldAmount;
+      await LedgerTransaction.findOneAndUpdate(
+        { referenceId: payment._id, type: 'PAYMENT' },
+        { $inc: { credit: diff, balanceAfter: -diff } }
+      );
+    }
+
+    const populated = await Payment.findById(payment._id)
+      .populate('shopId', 'name ownerName')
+      .populate('createdBy', 'name')
+      .lean();
+
+    res.status(200).json({ success: true, data: populated });
+  } catch (error) {
+    console.error('updatePayment error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};

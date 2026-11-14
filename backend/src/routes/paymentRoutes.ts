@@ -3,6 +3,7 @@ import {
   getAllPayments,
   getPaymentById,
   createPayment,
+  updatePayment,
 } from '../controllers/paymentController';
 import { protect, adminOnly } from '../middleware/auth';
 
@@ -18,5 +19,8 @@ router.post('/', adminOnly, createPayment);
 
 // GET /api/payments/:id
 router.get('/:id', getPaymentById);
+
+// PUT /api/payments/:id — admin edits a payment
+router.put('/:id', adminOnly, updatePayment);
 
 export default router;

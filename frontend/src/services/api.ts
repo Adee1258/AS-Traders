@@ -150,6 +150,10 @@ export const paymentsAPI = {
     paymentMethod: string;
     notes?: string;
   }) => api.post('/payments', data),
+  update: (
+    id: string,
+    data: Partial<{ amount: number; paymentMethod: string; notes: string }>
+  ) => api.put(`/payments/${id}`, data),
 };
 
 // ─── Ledger ────────────────────────────────────────────────────────────────

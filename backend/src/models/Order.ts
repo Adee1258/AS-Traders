@@ -20,8 +20,9 @@ export interface IOrder extends Document {
   status: 'confirmed' | 'cancelled';
   createdBy: mongoose.Types.ObjectId;
   // Bill features
-  billImageUrl?: string;
-  billDescription?: string;
+  billImageUrl?: string | null;
+  billImagePublicId?: string | null;
+  billDescription?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -110,8 +111,12 @@ const OrderSchema = new Schema<IOrder>(
       ref: 'User',
       required: true,
     },
-    // Physical bill photo (stored as base64 data URI) and description
+    // Physical bill photo — stored on Cloudinary, URL and publicId saved here
     billImageUrl: {
+      type: String,
+      default: null,
+    },
+    billImagePublicId: {
       type: String,
       default: null,
     },

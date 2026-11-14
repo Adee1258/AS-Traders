@@ -30,6 +30,7 @@ import AddEditSupplierScreen from '../screens/admin/AddEditSupplierScreen';
 import SupplierDetailScreen from '../screens/admin/SupplierDetailScreen';
 import MoreScreen from '../screens/admin/MoreScreen';
 import BillsScreen from '../screens/admin/BillsScreen';
+import EditPaymentScreen from '../screens/admin/EditPaymentScreen';
 
 // ─── Navigators ────────────────────────────────────────────────────────────
 const Tab = createBottomTabNavigator<AdminTabParamList>();
@@ -75,6 +76,7 @@ const ShopsStack = () => {
       <S.Screen name="NewOrder" component={NewOrderScreen} options={{ title: 'New Order' }} />
       <S.Screen name="OrderDetails" component={OrderDetailsScreen} options={{ title: 'Order Details' }} />
       <S.Screen name="AddPayment" component={AddPaymentScreen} options={{ title: 'Add Payment' }} />
+      <S.Screen name="EditPayment" component={EditPaymentScreen} options={{ title: 'Edit Payment' }} />
       <S.Screen name="ShopLedger" component={ShopLedgerScreen} options={({ route }: any) => ({ title: `${route.params.shopName} — Ledger` })} />
       <S.Screen name="AllBalances" component={AllBalancesScreen} options={{ title: 'All Balances' }} />
     </S.Navigator>
@@ -90,6 +92,7 @@ const OrdersStack = () => {
       <S.Screen name="AllPayments" component={AllPaymentsScreen} options={{ title: 'All Payments' }} />
       <S.Screen name="PaymentDetails" component={PaymentDetailsScreen} options={{ title: 'Payment Details' }} />
       <S.Screen name="AddPayment" component={AddPaymentScreen} options={{ title: 'Add Payment' }} />
+      <S.Screen name="EditPayment" component={EditPaymentScreen} options={{ title: 'Edit Payment' }} />
     </S.Navigator>
   );
 };
@@ -127,6 +130,7 @@ const MoreStack = () => {
       <S.Screen name="AddProduct" component={AddProductScreen} options={{ title: 'Add Product' }} />
       <S.Screen name="EditProduct" component={EditProductScreen} options={{ title: 'Edit Product' }} />
       <S.Screen name="AdminProfile" component={AdminProfileScreen} options={{ title: 'My Profile & Security' }} />
+      <S.Screen name="Expenses" component={ExpensesScreen} options={{ title: 'Expenses' }} />
     </S.Navigator>
   );
 };
@@ -186,6 +190,7 @@ const AdminNavigator = () => (
     <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} options={{ ...stackScreenOptions, headerShown: true, title: 'Order Details' } as any} />
     <Stack.Screen name="AddPayment" component={AddPaymentScreen} options={{ ...stackScreenOptions, headerShown: true, title: 'Add Payment' } as any} />
     <Stack.Screen name="PaymentDetails" component={PaymentDetailsScreen} options={{ ...stackScreenOptions, headerShown: true, title: 'Payment Details' } as any} />
+    <Stack.Screen name="EditPayment" component={EditPaymentScreen} options={{ ...stackScreenOptions, headerShown: true, title: 'Edit Payment' } as any} />
     <Stack.Screen name="ShopLedger" component={ShopLedgerScreen} options={{ ...stackScreenOptions, headerShown: true } as any} />
     <Stack.Screen name="Shops" component={ShopsScreen} options={{ ...stackScreenOptions, headerShown: true, title: 'Shops' } as any} />
     <Stack.Screen name="AllOrders" component={AllOrdersScreen} options={{ ...stackScreenOptions, headerShown: true, title: 'All Orders' } as any} />

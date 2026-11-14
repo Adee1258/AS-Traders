@@ -324,6 +324,7 @@ export type AdminStackParamList = {
   AllOrders: undefined;
   AllPayments: undefined;
   AddPayment: { shopId: string; shopName: string; currentBalance: number };
+  EditPayment: { paymentId: string; shopName: string; currentAmount: number; currentMethod: string; currentNotes: string };
   AllBalances: undefined;
   ShopLedger: { shopId: string; shopName: string };
   PaymentDetails: { paymentId: string };
