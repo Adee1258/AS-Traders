@@ -13,7 +13,8 @@ interface BiometricContextValue {
   toggleLock: () => Promise<void>;
   promptBiometric: () => Promise<boolean>;
   // Call this before opening camera/gallery to prevent lock on return
-  suppressLockOnce: () => void;
+  // pass count=2 if both permission dialog AND camera will open (default)
+  suppressLockOnce: (count?: number) => void;
 }
 
 const BiometricContext = createContext<BiometricContextValue | undefined>(undefined);
@@ -24,8 +25,13 @@ export const BiometricProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
 
   const appStateRef = useRef<AppStateStatus>('active');
-  // When true, the next background→active transition will NOT trigger a lock
-  const suppressNextLock = useRef(false);
+
+  // Counter — how many background→active transitions to suppress
+  // Camera flow: permission dialog (1 trip) + camera itself (1 trip) = 2 trips
+  // Gallery flow: same = 2 trips
+  // If permission already granted: only 1 trip
+  // We use 3 as a safe buffer — it resets after each transition
+  const suppressCount = useRef(0);
 
   // ── On mount: check device support & restore saved setting ────────────────
   useEffect(() => {
@@ -56,9 +62,8 @@ export const BiometricProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         nextState === 'active' &&
         isLockEnabled
       ) {
-        if (suppressNextLock.current) {
-          // Camera/gallery returned — skip this lock trigger
-          suppressNextLock.current = false;
+        if (suppressCount.current > 0) {
+          suppressCount.current -= 1;
           return;
         }
         setIsLocked(true);
@@ -68,9 +73,10 @@ export const BiometricProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return () => subscription.remove();
   }, [isLockEnabled]);
 
-  // ── suppressLockOnce: call before opening camera/gallery ─────────────────
-  const suppressLockOnce = useCallback(() => {
-    suppressNextLock.current = true;
+  // ── suppressLockOnce ──────────────────────────────────────────────────────
+  // count=3 covers: permission dialog + camera open + any extra transition
+  const suppressLockOnce = useCallback((count: number = 3) => {
+    suppressCount.current = count;
   }, []);
 
   // ── Prompt biometric ──────────────────────────────────────────────────────
