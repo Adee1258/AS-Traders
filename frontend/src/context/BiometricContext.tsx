@@ -5,6 +5,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY = 'biometric_lock_enabled';
 
+// Minimum time app must be in background before locking (ms)
+// Camera/gallery returns within a few seconds — real "leave app" takes longer
+const MIN_BACKGROUND_MS = 10_000; // 10 seconds
+
 interface BiometricContextValue {
   isLockEnabled: boolean;
   isLocked: boolean;
@@ -12,9 +16,7 @@ interface BiometricContextValue {
   unlock: () => void;
   toggleLock: () => Promise<void>;
   promptBiometric: () => Promise<boolean>;
-  // Call this before opening camera/gallery to prevent lock on return
-  // pass count=2 if both permission dialog AND camera will open (default)
-  suppressLockOnce: (count?: number) => void;
+  suppressLockOnce: () => void;
 }
 
 const BiometricContext = createContext<BiometricContextValue | undefined>(undefined);
@@ -25,15 +27,12 @@ export const BiometricProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
 
   const appStateRef = useRef<AppStateStatus>('active');
-
-  // Counter — how many background→active transitions to suppress
-  // Camera flow: permission dialog (1 trip) + camera itself (1 trip) = 2 trips
-  // Gallery flow: same = 2 trips
-  // If permission already granted: only 1 trip
-  // We use 3 as a safe buffer — it resets after each transition
+  // Timestamp when app went to background
+  const backgroundedAt = useRef<number | null>(null);
+  // Manual suppress flag for extra safety
   const suppressCount = useRef(0);
 
-  // ── On mount: check device support & restore saved setting ────────────────
+  // ── On mount ──────────────────────────────────────────────────────────────
   useEffect(() => {
     (async () => {
       const [hasHardware, isEnrolled] = await Promise.all([
@@ -57,16 +56,33 @@ export const BiometricProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const prevState = appStateRef.current;
       appStateRef.current = nextState;
 
-      if (
-        prevState === 'background' &&
-        nextState === 'active' &&
-        isLockEnabled
-      ) {
+      // Record when app goes to background
+      if (nextState === 'background' || nextState === 'inactive') {
+        if (backgroundedAt.current === null) {
+          backgroundedAt.current = Date.now();
+        }
+        return;
+      }
+
+      // App came back to foreground
+      if (nextState === 'active' && isLockEnabled) {
+        const timeInBackground = backgroundedAt.current
+          ? Date.now() - backgroundedAt.current
+          : 0;
+
+        backgroundedAt.current = null;
+
+        // Manual suppress (camera/gallery) — skip lock regardless of time
         if (suppressCount.current > 0) {
           suppressCount.current -= 1;
           return;
         }
-        setIsLocked(true);
+
+        // Only lock if app was in background long enough
+        // Camera/gallery trips are very short (< 10 seconds)
+        if (timeInBackground >= MIN_BACKGROUND_MS) {
+          setIsLocked(true);
+        }
       }
     });
 
@@ -74,9 +90,9 @@ export const BiometricProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [isLockEnabled]);
 
   // ── suppressLockOnce ──────────────────────────────────────────────────────
-  // count=3 covers: permission dialog + camera open + any extra transition
-  const suppressLockOnce = useCallback((count: number = 3) => {
-    suppressCount.current = count;
+  const suppressLockOnce = useCallback(() => {
+    // Set to 5 to safely cover all possible background trips during camera flow
+    suppressCount.current = 5;
   }, []);
 
   // ── Prompt biometric ──────────────────────────────────────────────────────
@@ -119,7 +135,10 @@ export const BiometricProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   return (
     <BiometricContext.Provider
-      value={{ isLockEnabled, isLocked, isBiometricSupported, unlock, toggleLock, promptBiometric, suppressLockOnce }}
+      value={{
+        isLockEnabled, isLocked, isBiometricSupported,
+        unlock, toggleLock, promptBiometric, suppressLockOnce,
+      }}
     >
       {children}
     </BiometricContext.Provider>
