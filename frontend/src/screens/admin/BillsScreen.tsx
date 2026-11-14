@@ -10,19 +10,23 @@ import * as ImagePicker from 'expo-image-picker';
 import { AdminStackParamList, Bill } from '../../types';
 import { billsAPI } from '../../services/api';
 import { formatCurrency, formatDate, formatDateTime } from '../../utils/format';
-import { COLORS, SPACING, BORDER_RADIUS, FONTS, SHADOWS } from '../../constants';
+import { COLORS, useColors, SPACING, BORDER_RADIUS, FONTS, SHADOWS } from '../../constants';
 import EmptyState from '../../components/EmptyState';
 import LoadingScreen from '../../components/LoadingScreen';
+import { useBiometric } from '../../context/BiometricContext';
 
 type Route = RouteProp<AdminStackParamList, 'Bills'>;
 
 const SOURCE_LABELS: Record<string, string> = {
-  manual:         '📎 Manual',
-  auto_order:     '🤖 Auto (Order)',
-  auto_purchase:  '🤖 Auto (Purchase)',
+  manual: '📎 Manual',
+  auto_order: '🤖 Auto (Order)',
+  auto_purchase: '🤖 Auto (Purchase)',
 };
 
 const BillsScreen = () => {
+  const C = useColors();
+  const styles = getStyles(C);
+  const { suppressLockOnce } = useBiometric();
   const route = useRoute<Route>();
   const { partyType, partyId, partyName } = route.params;
 
@@ -95,6 +99,9 @@ const BillsScreen = () => {
       Alert.alert('Permission Required', 'Access chahiye');
       return;
     }
+
+    // Camera/gallery will put app in background — suppress lock on return
+    suppressLockOnce();
 
     const result = source === 'camera'
       ? await ImagePicker.launchCameraAsync({ allowsEditing: true, quality: 0.6, base64: true })
@@ -206,7 +213,7 @@ const BillsScreen = () => {
             <TextInput
               style={styles.dateInput}
               placeholder="From (YYYY-MM-DD)"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={C.textMuted}
               value={dateFrom}
               onChangeText={setDateFrom}
             />
@@ -214,7 +221,7 @@ const BillsScreen = () => {
             <TextInput
               style={styles.dateInput}
               placeholder="To (YYYY-MM-DD)"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={C.textMuted}
               value={dateTo}
               onChangeText={setDateTo}
             />
@@ -293,7 +300,7 @@ const BillsScreen = () => {
                   disabled={deleting === b._id}
                 >
                   {deleting === b._id
-                    ? <ActivityIndicator size="small" color={COLORS.danger} />
+                    ? <ActivityIndicator size="small" color={C.danger} />
                     : <Text style={styles.deleteBtnText}>🗑️</Text>
                   }
                 </TouchableOpacity>
@@ -369,7 +376,7 @@ const BillsScreen = () => {
               <TextInput
                 style={styles.fInput}
                 placeholder="e.g. Order bill, Maal kharida"
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={C.textMuted}
                 value={fTitle}
                 onChangeText={setFTitle}
               />
@@ -379,7 +386,7 @@ const BillsScreen = () => {
               <TextInput
                 style={styles.fInput}
                 placeholder="e.g. 5000"
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={C.textMuted}
                 value={fAmount}
                 onChangeText={setFAmount}
                 keyboardType="numeric"
@@ -390,7 +397,7 @@ const BillsScreen = () => {
               <TextInput
                 style={styles.fInput}
                 placeholder="e.g. 2026-10-15"
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={C.textMuted}
                 value={fDate}
                 onChangeText={setFDate}
               />
@@ -400,7 +407,7 @@ const BillsScreen = () => {
               <TextInput
                 style={[styles.fInput, { minHeight: 70, textAlignVertical: 'top' }]}
                 placeholder="Koi detail add karein..."
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={C.textMuted}
                 value={fDesc}
                 onChangeText={setFDesc}
                 multiline
@@ -460,10 +467,10 @@ const BillsScreen = () => {
                 activeOpacity={0.8}
               >
                 {saving
-                  ? <ActivityIndicator color={COLORS.white} size="small" />
+                  ? <ActivityIndicator color={C.white} size="small" />
                   : <Text style={styles.saveBtnText}>
-                      {editingBill ? '✅ Update Bill' : '✅ Save Bill'}
-                    </Text>
+                    {editingBill ? '✅ Update Bill' : '✅ Save Bill'}
+                  </Text>
                 }
               </TouchableOpacity>
 
@@ -476,73 +483,73 @@ const BillsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const getStyles = (C: typeof COLORS) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
 
   topBar: {
     flexDirection: 'row', alignItems: 'center',
-    padding: SPACING.md, backgroundColor: COLORS.white,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border,
+    padding: SPACING.md, backgroundColor: C.white,
+    borderBottomWidth: 1, borderBottomColor: C.border,
     gap: SPACING.sm,
   },
-  partyName: { fontSize: 15, fontFamily: FONTS.bold, color: COLORS.text },
-  countText: { fontSize: 11, fontFamily: FONTS.regular, color: COLORS.textMuted, marginTop: 2 },
+  partyName: { fontSize: 15, fontFamily: FONTS.bold, color: C.text },
+  countText: { fontSize: 11, fontFamily: FONTS.regular, color: C.textMuted, marginTop: 2 },
   addBtn: {
-    backgroundColor: COLORS.primary, borderRadius: BORDER_RADIUS.md,
+    backgroundColor: C.primary, borderRadius: BORDER_RADIUS.md,
     paddingHorizontal: SPACING.md, paddingVertical: 10,
     ...SHADOWS.sm,
   },
-  addBtnText: { fontSize: 13, fontFamily: FONTS.bold, color: COLORS.white },
+  addBtnText: { fontSize: 13, fontFamily: FONTS.bold, color: C.white },
 
   filterBox: {
-    backgroundColor: COLORS.white, padding: SPACING.md,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border,
+    backgroundColor: C.white, padding: SPACING.md,
+    borderBottomWidth: 1, borderBottomColor: C.border,
   },
-  filterLabel: { fontSize: 11, fontFamily: FONTS.bold, color: COLORS.textMuted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
+  filterLabel: { fontSize: 11, fontFamily: FONTS.bold, color: C.textMuted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
   filterRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   dateInput: {
-    flex: 1, borderWidth: 1, borderColor: COLORS.border,
+    flex: 1, borderWidth: 1, borderColor: C.border,
     borderRadius: BORDER_RADIUS.sm, paddingHorizontal: 10, paddingVertical: 7,
-    fontSize: 12, fontFamily: FONTS.regular, color: COLORS.text,
-    backgroundColor: COLORS.surface,
+    fontSize: 12, fontFamily: FONTS.regular, color: C.text,
+    backgroundColor: C.surface,
   },
-  filterSep: { fontSize: 14, color: COLORS.textMuted },
+  filterSep: { fontSize: 14, color: C.textMuted },
   filterBtns: { flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.sm },
   filterApplyBtn: {
     paddingHorizontal: SPACING.md, paddingVertical: 7,
-    backgroundColor: COLORS.primary, borderRadius: BORDER_RADIUS.sm,
+    backgroundColor: C.primary, borderRadius: BORDER_RADIUS.sm,
   },
-  filterApplyText: { fontSize: 12, fontFamily: FONTS.bold, color: COLORS.white },
+  filterApplyText: { fontSize: 12, fontFamily: FONTS.bold, color: C.white },
   filterClearBtn: {
     paddingHorizontal: SPACING.md, paddingVertical: 7,
-    backgroundColor: COLORS.dangerLight, borderRadius: BORDER_RADIUS.sm,
-    borderWidth: 1, borderColor: COLORS.danger,
+    backgroundColor: C.dangerLight, borderRadius: BORDER_RADIUS.sm,
+    borderWidth: 1, borderColor: C.danger,
   },
-  filterClearText: { fontSize: 12, fontFamily: FONTS.bold, color: COLORS.danger },
+  filterClearText: { fontSize: 12, fontFamily: FONTS.bold, color: C.danger },
 
   list: { padding: SPACING.md, paddingBottom: 120 },
 
   card: {
-    flexDirection: 'row', backgroundColor: COLORS.white,
+    flexDirection: 'row', backgroundColor: C.white,
     borderRadius: BORDER_RADIUS.md, marginBottom: SPACING.sm,
     overflow: 'hidden', ...SHADOWS.sm,
-    borderWidth: 1, borderColor: COLORS.borderLight,
+    borderWidth: 1, borderColor: C.borderLight,
   },
-  thumbBox: { width: 72, backgroundColor: COLORS.surface },
+  thumbBox: { width: 72, backgroundColor: C.surface },
   thumb: { width: 72, height: '100%' as any, minHeight: 80 },
   thumbPlaceholder: {
     width: 72, minHeight: 80,
     justifyContent: 'center', alignItems: 'center',
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: C.primaryLight,
   },
   thumbPlaceholderIcon: { fontSize: 28 },
 
   cardInfo: { flex: 1, padding: SPACING.sm },
-  cardTitle: { fontSize: 13, fontFamily: FONTS.bold, color: COLORS.text },
-  cardDate: { fontSize: 11, fontFamily: FONTS.regular, color: COLORS.textMuted, marginTop: 2 },
-  cardAmount: { fontSize: 13, fontFamily: FONTS.heavy, color: COLORS.primary, marginTop: 2 },
-  cardDesc: { fontSize: 11, fontFamily: FONTS.regular, color: COLORS.textSecondary, marginTop: 2 },
-  cardSource: { fontSize: 10, fontFamily: FONTS.semiBold, color: COLORS.textMuted, marginTop: 3 },
+  cardTitle: { fontSize: 13, fontFamily: FONTS.bold, color: C.text },
+  cardDate: { fontSize: 11, fontFamily: FONTS.regular, color: C.textMuted, marginTop: 2 },
+  cardAmount: { fontSize: 13, fontFamily: FONTS.heavy, color: C.primary, marginTop: 2 },
+  cardDesc: { fontSize: 11, fontFamily: FONTS.regular, color: C.textSecondary, marginTop: 2 },
+  cardSource: { fontSize: 10, fontFamily: FONTS.semiBold, color: C.textMuted, marginTop: 3 },
 
   cardActions: {
     flexDirection: 'column', justifyContent: 'center',
@@ -550,13 +557,13 @@ const styles = StyleSheet.create({
   },
   editBtn: {
     width: 32, height: 32, borderRadius: 8,
-    backgroundColor: COLORS.surface, justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1, borderColor: COLORS.border,
+    backgroundColor: C.surface, justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1, borderColor: C.border,
   },
   editBtnText: { fontSize: 14 },
   deleteBtn: {
     width: 32, height: 32, borderRadius: 8,
-    backgroundColor: COLORS.dangerLight, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: C.dangerLight, justifyContent: 'center', alignItems: 'center',
     borderWidth: 1, borderColor: 'rgba(220,38,38,0.3)',
   },
   deleteBtnText: { fontSize: 14 },
@@ -567,70 +574,70 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center', padding: SPACING.md,
   },
   imageSheet: {
-    backgroundColor: COLORS.white, borderRadius: BORDER_RADIUS.xl,
+    backgroundColor: C.white, borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.md, width: '100%', maxHeight: '88%',
   },
   imageSheetHeader: {
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: SPACING.sm,
   },
-  imageSheetTitle: { fontSize: 15, fontFamily: FONTS.bold, color: COLORS.text, flex: 1 },
-  closeText: { fontSize: 22, color: COLORS.textMuted, padding: 4 },
-  fullImage: { width: '100%', height: 340, borderRadius: BORDER_RADIUS.md, backgroundColor: COLORS.surface },
-  viewBillDate: { fontSize: 12, fontFamily: FONTS.semiBold, color: COLORS.textSecondary, marginTop: SPACING.sm },
-  viewBillDesc: { fontSize: 13, fontFamily: FONTS.regular, color: COLORS.textSecondary, marginTop: 4 },
+  imageSheetTitle: { fontSize: 15, fontFamily: FONTS.bold, color: C.text, flex: 1 },
+  closeText: { fontSize: 22, color: C.textMuted, padding: 4 },
+  fullImage: { width: '100%', height: 340, borderRadius: BORDER_RADIUS.md, backgroundColor: C.surface },
+  viewBillDate: { fontSize: 12, fontFamily: FONTS.semiBold, color: C.textSecondary, marginTop: SPACING.sm },
+  viewBillDesc: { fontSize: 13, fontFamily: FONTS.regular, color: C.textSecondary, marginTop: 4 },
 
   // Form modal
   formOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
   formSheet: {
-    backgroundColor: COLORS.white,
+    backgroundColor: C.white,
     borderTopLeftRadius: BORDER_RADIUS.xl, borderTopRightRadius: BORDER_RADIUS.xl,
     padding: SPACING.md, maxHeight: '94%',
   },
   formHeader: {
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: SPACING.md,
-    paddingBottom: SPACING.sm, borderBottomWidth: 1, borderBottomColor: COLORS.border,
+    paddingBottom: SPACING.sm, borderBottomWidth: 1, borderBottomColor: C.border,
   },
-  formTitle: { fontSize: 16, fontFamily: FONTS.bold, color: COLORS.text },
+  formTitle: { fontSize: 16, fontFamily: FONTS.bold, color: C.text },
 
   fLabel: {
-    fontSize: 12, fontFamily: FONTS.bold, color: COLORS.textSecondary,
+    fontSize: 12, fontFamily: FONTS.bold, color: C.textSecondary,
     textTransform: 'uppercase', letterSpacing: 0.5,
     marginBottom: SPACING.xs, marginTop: SPACING.sm,
   },
   fInput: {
-    borderWidth: 1.5, borderColor: COLORS.border, borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1.5, borderColor: C.border, borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md, fontSize: 14, fontFamily: FONTS.regular,
-    color: COLORS.text, backgroundColor: COLORS.surface, minHeight: 48,
+    color: C.text, backgroundColor: C.surface, minHeight: 48,
   },
 
   imagePickerRow: { flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.sm },
   imagePickerBtn: {
-    flex: 1, borderWidth: 1.5, borderColor: COLORS.border,
+    flex: 1, borderWidth: 1.5, borderColor: C.border,
     borderRadius: BORDER_RADIUS.md, padding: SPACING.md,
-    alignItems: 'center', backgroundColor: COLORS.surface,
+    alignItems: 'center', backgroundColor: C.surface,
   },
   imagePickerIcon: { fontSize: 26, marginBottom: 4 },
-  imagePickerText: { fontSize: 13, fontFamily: FONTS.semiBold, color: COLORS.text },
+  imagePickerText: { fontSize: 13, fontFamily: FONTS.semiBold, color: C.text },
 
   previewContainer: { alignItems: 'center', marginBottom: SPACING.sm },
-  previewImage: { width: '100%', height: 200, borderRadius: BORDER_RADIUS.md, backgroundColor: COLORS.surface },
+  previewImage: { width: '100%', height: 200, borderRadius: BORDER_RADIUS.md, backgroundColor: C.surface },
   removeImageBtn: {
     marginTop: SPACING.sm, paddingVertical: 6, paddingHorizontal: 16,
-    borderRadius: BORDER_RADIUS.md, backgroundColor: COLORS.dangerLight,
+    borderRadius: BORDER_RADIUS.md, backgroundColor: C.dangerLight,
   },
-  removeImageText: { fontSize: 12, fontFamily: FONTS.semiBold, color: COLORS.danger },
+  removeImageText: { fontSize: 12, fontFamily: FONTS.semiBold, color: C.danger },
 
   existingImageBox: { marginBottom: SPACING.sm },
   existingImage: { width: '100%', height: 120, borderRadius: BORDER_RADIUS.md },
-  existingImageNote: { fontSize: 11, fontFamily: FONTS.regular, color: COLORS.textMuted, marginTop: 4 },
+  existingImageNote: { fontSize: 11, fontFamily: FONTS.regular, color: C.textMuted, marginTop: 4 },
 
   saveBtn: {
-    backgroundColor: COLORS.primary, borderRadius: BORDER_RADIUS.md,
+    backgroundColor: C.primary, borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md, alignItems: 'center', marginTop: SPACING.md,
   },
-  saveBtnText: { fontSize: 15, fontFamily: FONTS.bold, color: COLORS.white },
+  saveBtnText: { fontSize: 15, fontFamily: FONTS.bold, color: C.white },
 });
 
 export default BillsScreen;

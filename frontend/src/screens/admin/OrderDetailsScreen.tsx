@@ -11,8 +11,9 @@ import * as ImagePicker from 'expo-image-picker';
 import { AdminStackParamList, Order, Shop } from '../../types';
 import { ordersAPI } from '../../services/api';
 import { formatCurrency, formatDate, formatDateTime } from '../../utils/format';
-import { COLORS, SPACING, BORDER_RADIUS, FONTS, SHADOWS } from '../../constants';
+import { COLORS, useColors, SPACING, BORDER_RADIUS, FONTS, SHADOWS } from '../../constants';
 import Card from '../../components/Card';
+import { useBiometric } from '../../context/BiometricContext';
 
 type Route = RouteProp<AdminStackParamList, 'OrderDetails'>;
 
@@ -175,6 +176,9 @@ const buildBillHtml = (order: Order, shop: Shop | null): string => {
 
 // ─── Main Screen ────────────────────────────────────────────────────────────
 const OrderDetailsScreen = () => {
+  const C = useColors();
+  const styles = getStyles(C);
+  const { suppressLockOnce } = useBiometric();
   const route = useRoute<Route>();
   const { orderId } = route.params;
 
@@ -246,6 +250,9 @@ const OrderDetailsScreen = () => {
       return;
     }
 
+    // Camera/gallery will put app in background — suppress lock on return
+    suppressLockOnce();
+
     const result =
       source === 'camera'
         ? await ImagePicker.launchCameraAsync({
@@ -308,7 +315,7 @@ const OrderDetailsScreen = () => {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color={C.primary} />
       </View>
     );
   }
@@ -334,11 +341,11 @@ const OrderDetailsScreen = () => {
             <Text style={styles.orderNum}>{order.orderNumber}</Text>
             <View style={[
               styles.statusBadge,
-              { backgroundColor: order.status === 'confirmed' ? COLORS.successLight : COLORS.dangerLight },
+              { backgroundColor: order.status === 'confirmed' ? C.successLight : C.dangerLight },
             ]}>
               <Text style={[
                 styles.statusText,
-                { color: order.status === 'confirmed' ? COLORS.success : COLORS.danger },
+                { color: order.status === 'confirmed' ? C.success : C.danger },
               ]}>
                 {order.status}
               </Text>
@@ -376,7 +383,7 @@ const OrderDetailsScreen = () => {
             activeOpacity={0.8}
           >
             {generating ? (
-              <ActivityIndicator color={COLORS.white} size="small" />
+              <ActivityIndicator color={C.white} size="small" />
             ) : (
               <>
                 <Text style={styles.actionBtnIcon}>🧾</Text>
@@ -393,10 +400,10 @@ const OrderDetailsScreen = () => {
             activeOpacity={0.8}
           >
             <Text style={styles.actionBtnIcon}>{hasBill ? '✅' : '📷'}</Text>
-            <Text style={[styles.actionBtnText, hasBill && { color: COLORS.success }]}>
+            <Text style={[styles.actionBtnText, hasBill && { color: C.success }]}>
               {hasBill ? 'Bill Uploaded' : 'Upload Bill'}
             </Text>
-            <Text style={[styles.actionBtnSub, hasBill && { color: COLORS.success }]}>
+            <Text style={[styles.actionBtnSub, hasBill && { color: C.success }]}>
               {hasBill ? 'Tap to update' : 'Photo + Note'}
             </Text>
           </TouchableOpacity>
@@ -537,7 +544,7 @@ const OrderDetailsScreen = () => {
               <TextInput
                 style={styles.descInput}
                 placeholder="e.g. Original bill, thela se mila, date 10 Oct..."
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={C.textMuted}
                 value={uploadDescription}
                 onChangeText={setUploadDescription}
                 multiline
@@ -560,7 +567,7 @@ const OrderDetailsScreen = () => {
                 activeOpacity={0.8}
               >
                 {uploading ? (
-                  <ActivityIndicator color={COLORS.white} size="small" />
+                  <ActivityIndicator color={C.white} size="small" />
                 ) : (
                   <Text style={styles.uploadBtnText}>✅ Save Bill</Text>
                 )}
@@ -622,11 +629,11 @@ const OrderDetailsScreen = () => {
 };
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const getStyles = (C: typeof COLORS) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   content: { padding: SPACING.md, paddingBottom: 80 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { color: COLORS.danger, fontSize: 16, fontFamily: FONTS.semiBold },
+  errorText: { color: C.danger, fontSize: 16, fontFamily: FONTS.semiBold },
 
   // Header card
   headerCard: { padding: SPACING.md, marginBottom: SPACING.md },
@@ -634,15 +641,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: SPACING.sm,
   },
-  orderNum: { fontSize: 18, fontFamily: FONTS.heavy, color: COLORS.primary },
+  orderNum: { fontSize: 18, fontFamily: FONTS.heavy, color: C.primary },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: BORDER_RADIUS.round },
   statusText: { fontSize: 12, fontFamily: FONTS.bold, textTransform: 'capitalize' },
   metaRow: {
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', marginTop: 6,
   },
-  metaLabel: { fontSize: 13, fontFamily: FONTS.regular, color: COLORS.textSecondary },
-  metaValue: { fontSize: 13, fontFamily: FONTS.semiBold, color: COLORS.text },
+  metaLabel: { fontSize: 13, fontFamily: FONTS.regular, color: C.textSecondary },
+  metaValue: { fontSize: 13, fontFamily: FONTS.semiBold, color: C.text },
 
   // Action Buttons Row
   actionRow: {
@@ -654,12 +661,12 @@ const styles = StyleSheet.create({
     padding: SPACING.md, alignItems: 'center',
     ...SHADOWS.sm,
   },
-  actionBtnPrimary: { backgroundColor: COLORS.primary },
-  actionBtnSecondary: { backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border },
-  actionBtnSuccess: { backgroundColor: COLORS.successLight, borderWidth: 1.5, borderColor: COLORS.success },
+  actionBtnPrimary: { backgroundColor: C.primary },
+  actionBtnSecondary: { backgroundColor: C.white, borderWidth: 1.5, borderColor: C.border },
+  actionBtnSuccess: { backgroundColor: C.successLight, borderWidth: 1.5, borderColor: C.success },
   actionBtnIcon: { fontSize: 24, marginBottom: 4 },
   actionBtnText: {
-    fontSize: 13, fontFamily: FONTS.bold, color: COLORS.white, textAlign: 'center',
+    fontSize: 13, fontFamily: FONTS.bold, color: C.white, textAlign: 'center',
   },
   actionBtnSub: {
     fontSize: 10, fontFamily: FONTS.regular, color: 'rgba(255,255,255,0.75)',
@@ -672,44 +679,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: SPACING.sm,
   },
-  uploadedTitle: { fontSize: 14, fontFamily: FONTS.bold, color: COLORS.text },
-  viewFullBtn: { fontSize: 13, fontFamily: FONTS.semiBold, color: COLORS.primary },
+  uploadedTitle: { fontSize: 14, fontFamily: FONTS.bold, color: C.text },
+  viewFullBtn: { fontSize: 13, fontFamily: FONTS.semiBold, color: C.primary },
   billThumb: {
     width: '100%', height: 160, borderRadius: BORDER_RADIUS.md,
-    marginBottom: SPACING.sm, backgroundColor: COLORS.surface,
+    marginBottom: SPACING.sm, backgroundColor: C.surface,
   },
   billDescBox: {
-    backgroundColor: COLORS.primaryLight, borderRadius: BORDER_RADIUS.md,
+    backgroundColor: C.primaryLight, borderRadius: BORDER_RADIUS.md,
     padding: SPACING.sm, marginTop: SPACING.xs,
   },
   billDescLabel: {
-    fontSize: 10, fontFamily: FONTS.bold, color: COLORS.primary,
+    fontSize: 10, fontFamily: FONTS.bold, color: C.primary,
     textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2,
   },
-  billDescText: { fontSize: 13, fontFamily: FONTS.regular, color: COLORS.text },
+  billDescText: { fontSize: 13, fontFamily: FONTS.regular, color: C.text },
 
   // Items
   sectionTitle: {
-    fontSize: 13, fontFamily: FONTS.bold, color: COLORS.textSecondary,
+    fontSize: 13, fontFamily: FONTS.bold, color: C.textSecondary,
     textTransform: 'uppercase', letterSpacing: 0.8,
     marginBottom: SPACING.sm, marginTop: SPACING.xs,
   },
   itemCard: { padding: SPACING.md, marginBottom: SPACING.xs },
   itemHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  itemName: { fontSize: 14, fontFamily: FONTS.bold, color: COLORS.text, flex: 1 },
-  itemTotal: { fontSize: 14, fontFamily: FONTS.heavy, color: COLORS.primary },
+  itemName: { fontSize: 14, fontFamily: FONTS.bold, color: C.text, flex: 1 },
+  itemTotal: { fontSize: 14, fontFamily: FONTS.heavy, color: C.primary },
   itemDetails: { marginTop: 4 },
-  itemQty: { fontSize: 12, fontFamily: FONTS.regular, color: COLORS.textSecondary },
+  itemQty: { fontSize: 12, fontFamily: FONTS.regular, color: C.textSecondary },
 
   // Total
   totalBox: { marginTop: SPACING.sm },
-  divider: { height: 1, backgroundColor: COLORS.border, marginBottom: SPACING.sm },
+  divider: { height: 1, backgroundColor: C.border, marginBottom: SPACING.sm },
   totalRow: {
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', paddingHorizontal: 4,
   },
-  totalLabel: { fontSize: 15, fontFamily: FONTS.semiBold, color: COLORS.text },
-  totalAmount: { fontSize: 22, fontFamily: FONTS.heavy, color: COLORS.primary },
+  totalLabel: { fontSize: 15, fontFamily: FONTS.semiBold, color: C.text },
+  totalAmount: { fontSize: 22, fontFamily: FONTS.heavy, color: C.primary },
 
   // Upload Modal
   modalOverlay: {
@@ -717,7 +724,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: C.white,
     borderTopLeftRadius: BORDER_RADIUS.xl,
     borderTopRightRadius: BORDER_RADIUS.xl,
     padding: SPACING.md,
@@ -727,12 +734,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: SPACING.md,
     paddingBottom: SPACING.sm,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border,
+    borderBottomWidth: 1, borderBottomColor: C.border,
   },
-  modalTitle: { fontSize: 16, fontFamily: FONTS.bold, color: COLORS.text },
-  modalClose: { fontSize: 20, color: COLORS.textMuted, padding: 4 },
+  modalTitle: { fontSize: 16, fontFamily: FONTS.bold, color: C.text },
+  modalClose: { fontSize: 20, color: C.textMuted, padding: 4 },
   modalSectionLabel: {
-    fontSize: 12, fontFamily: FONTS.bold, color: COLORS.textSecondary,
+    fontSize: 12, fontFamily: FONTS.bold, color: C.textSecondary,
     textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: SPACING.sm,
   },
 
@@ -741,54 +748,54 @@ const styles = StyleSheet.create({
     flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.md,
   },
   imagePickerBtn: {
-    flex: 1, borderWidth: 1.5, borderColor: COLORS.border,
+    flex: 1, borderWidth: 1.5, borderColor: C.border,
     borderRadius: BORDER_RADIUS.md, padding: SPACING.md,
-    alignItems: 'center', backgroundColor: COLORS.surface,
+    alignItems: 'center', backgroundColor: C.surface,
   },
   imagePickerIcon: { fontSize: 28, marginBottom: 4 },
-  imagePickerText: { fontSize: 13, fontFamily: FONTS.semiBold, color: COLORS.text },
+  imagePickerText: { fontSize: 13, fontFamily: FONTS.semiBold, color: C.text },
 
   previewContainer: { alignItems: 'center', marginBottom: SPACING.sm },
   previewImage: {
     width: '100%', height: 220, borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.surface,
+    backgroundColor: C.surface,
   },
   removeImageBtn: {
     marginTop: SPACING.sm, paddingVertical: 6, paddingHorizontal: 16,
-    borderRadius: BORDER_RADIUS.md, backgroundColor: COLORS.dangerLight,
+    borderRadius: BORDER_RADIUS.md, backgroundColor: C.dangerLight,
   },
-  removeImageText: { fontSize: 12, fontFamily: FONTS.semiBold, color: COLORS.danger },
+  removeImageText: { fontSize: 12, fontFamily: FONTS.semiBold, color: C.danger },
 
   noImageBox: {
     height: 80, borderRadius: BORDER_RADIUS.md, borderWidth: 1.5,
-    borderColor: COLORS.border, borderStyle: 'dashed',
+    borderColor: C.border, borderStyle: 'dashed',
     justifyContent: 'center', alignItems: 'center',
-    backgroundColor: COLORS.surface, marginBottom: SPACING.sm,
+    backgroundColor: C.surface, marginBottom: SPACING.sm,
   },
-  noImageText: { fontSize: 13, fontFamily: FONTS.regular, color: COLORS.textMuted },
+  noImageText: { fontSize: 13, fontFamily: FONTS.regular, color: C.textMuted },
 
   descInput: {
-    borderWidth: 1.5, borderColor: COLORS.border, borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1.5, borderColor: C.border, borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md, fontSize: 14, fontFamily: FONTS.regular,
-    color: COLORS.text, backgroundColor: COLORS.surface,
+    color: C.text, backgroundColor: C.surface,
     minHeight: 90, textAlignVertical: 'top',
   },
 
   orderRefBox: {
-    backgroundColor: COLORS.primaryLight, borderRadius: BORDER_RADIUS.sm,
+    backgroundColor: C.primaryLight, borderRadius: BORDER_RADIUS.sm,
     padding: SPACING.sm, marginTop: SPACING.md,
     alignItems: 'center',
   },
   orderRefText: {
-    fontSize: 12, fontFamily: FONTS.semiBold, color: COLORS.primary,
+    fontSize: 12, fontFamily: FONTS.semiBold, color: C.primary,
   },
 
   uploadBtn: {
-    backgroundColor: COLORS.primary, borderRadius: BORDER_RADIUS.md,
+    backgroundColor: C.primary, borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md, alignItems: 'center', marginTop: SPACING.md,
   },
   uploadBtnDisabled: { opacity: 0.6 },
-  uploadBtnText: { fontSize: 15, fontFamily: FONTS.bold, color: COLORS.white },
+  uploadBtnText: { fontSize: 15, fontFamily: FONTS.bold, color: C.white },
 
   // View Full Bill Modal
   viewBillOverlay: {
@@ -796,12 +803,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center', padding: SPACING.md,
   },
   viewBillCard: {
-    backgroundColor: COLORS.white, borderRadius: BORDER_RADIUS.xl,
+    backgroundColor: C.white, borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.md, width: '100%', maxHeight: '88%',
   },
   fullBillImage: {
     width: '100%', height: 380, borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.surface, marginBottom: SPACING.md,
+    backgroundColor: C.surface, marginBottom: SPACING.md,
   },
 });
 
